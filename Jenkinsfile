@@ -66,6 +66,13 @@ pipeline {
                 container('maven') {
                     echo "Updating versions to ${params.NEW_VERSION}"
                     
+                    sh '''
+                        echo "=== Current directory ==="
+                        pwd
+                        echo "=== Files in workspace ==="
+                        ls -la
+                    '''
+
                     script {
                         updatePomVersion(params.NEW_VERSION)
                     }

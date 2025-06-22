@@ -26,10 +26,10 @@ pipeline {
                         spec:
                         containers:
                         - name: git
-                        image: alpine/git
-                        command:
-                        - cat
-                        tty: true
+                            image: alpine/git
+                            command:
+                            - cat
+                            tty: true
                     """
                 }
             }
@@ -97,7 +97,7 @@ pipeline {
                         pwd
                         echo "=== Files in workspace ==="
                         ls -la
-                        
+
                         echo "Running Maven clean package..."
                         mvn clean package -DskipTests
                         

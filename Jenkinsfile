@@ -18,7 +18,7 @@ pipeline {
                     tty: true
                   - name: docker
                     image: docker:28.2.2-dind
-                    command: [cat]
+                    command: [dockerd-entrypoint.sh]
                     tty: true
                     securityContext:
                       privileged: true

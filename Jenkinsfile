@@ -24,8 +24,8 @@ pipeline {
                         apiVersion: v1
                         kind: Pod
                         spec:
-                        containers:
-                        - name: git
+                          containers:
+                          - name: git
                             image: alpine/git
                             command:
                             - cat

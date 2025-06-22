@@ -9,7 +9,7 @@ pipeline {
     }
 
     parameters {
-        string(name: 'NEW_VERSION', defaultValue: '1.2.0', description: 'Version to bump to')
+        string(name: 'NEW_VERSION', description: 'Version to bump to')
     }
 
     environment {
@@ -37,6 +37,12 @@ pipeline {
                 container('git') {
                     cleanWs()       // Clear any stale workspace
                     checkout scm
+                    sh '''
+                        echo "=== Current directory ==="
+                        pwd
+                        echo "=== Files in workspace ==="
+                        ls -la
+                    '''
                 }
             }
         }
@@ -87,6 +93,11 @@ pipeline {
                 container('maven') {
                     echo "Building and pushing Maven application"
                     sh '''
+                        echo "=== Current directory ==="
+                        pwd
+                        echo "=== Files in workspace ==="
+                        ls -la
+                        
                         echo "Running Maven clean package..."
                         mvn clean package -DskipTests
                         

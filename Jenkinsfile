@@ -35,6 +35,7 @@ pipeline {
             }
             steps {
                 container('git') {
+                    cleanWs()       // Clear any stale workspace
                     checkout scm
                 }
             }
@@ -124,13 +125,6 @@ pipeline {
                         ])
                     }
                 }
-            }
-        }
-    }
-    post {
-        always {
-            node {
-                cleanWs()
             }
         }
     }

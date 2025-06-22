@@ -1,7 +1,30 @@
 @Library('shared-library') _
 
 pipeline {
-    agent none
+    agent {
+        kubernetes {
+            yaml """
+                apiVersion: v1
+                kind: Pod
+                spec:
+                  containers:
+                  - name: git
+                    image: alpine/git:2.49.0
+                    command: [cat]
+                    tty: true
+                  - name: maven
+                    image: maven:3.6.3-openjdk-8
+                    command: [cat]
+                    tty: true
+                  - name: docker
+                    image: docker:28.2.2-dind
+                    command: [cat]
+                    tty: true
+                    securityContext:
+                      privileged: true
+            """
+        }
+    }
     
     options {
         skipDefaultCheckout()
@@ -18,60 +41,17 @@ pipeline {
 
     stages {
         stage('Checkout SCM') {
-            agent {
-                kubernetes {
-                    yaml """
-                        apiVersion: v1
-                        kind: Pod
-                        spec:
-                          containers:
-                          - name: git
-                            image: alpine/git
-                            command:
-                            - cat
-                            tty: true
-                    """
-                }
-            }
             steps {
                 container('git') {
                     cleanWs()       // Clear any stale workspace
                     checkout scm
-                    sh '''
-                        echo "=== Current directory ==="
-                        pwd
-                        echo "=== Files in workspace ==="
-                        ls -la
-                    '''
                 }
             }
         }
         stage('Update Versions') {
-            agent {
-                kubernetes {
-                    yaml """
-                        apiVersion: v1
-                        kind: Pod
-                        spec:
-                          containers:
-                          - name: maven
-                            image: maven:3.6.3-openjdk-8
-                            command:
-                            - cat
-                            tty: true
-                    """
-                }
-            }
             steps {
                 container('maven') {
                     echo "Updating versions to ${params.NEW_VERSION}"
-                    
-                    sh '''
-                        echo "=== Current directory ==="
-                        pwd
-                        echo "=== Files in workspace ==="
-                        ls -la
-                    '''
 
                     script {
                         updatePomVersion(params.NEW_VERSION)
@@ -81,30 +61,10 @@ pipeline {
         }
         
         stage('Build & Push Application') {
-            agent {
-                kubernetes {
-                    yaml """
-                        apiVersion: v1
-                        kind: Pod
-                        spec:
-                          containers:
-                          - name: maven
-                            image: maven:3.6.3-openjdk-8
-                            command:
-                            - cat
-                            tty: true
-                    """
-                }
-            }
             steps {
                 container('maven') {
                     echo "Building and pushing Maven application"
                     sh '''
-                        echo "=== Current directory ==="
-                        pwd
-                        echo "=== Files in workspace ==="
-                        ls -la
-
                         echo "Running Maven clean package..."
                         mvn clean package -DskipTests
                         
@@ -116,23 +76,6 @@ pipeline {
         }
         
         stage('Build & Push Docker Image') {
-            agent {
-                kubernetes {
-                    yaml """
-                        apiVersion: v1
-                        kind: Pod
-                        spec:
-                          containers:
-                          - name: docker
-                            image: docker:20.10.16-dind
-                            securityContext:
-                              privileged: true
-                            env:
-                            - name: DOCKER_TLS_CERTDIR
-                              value: ""
-                    """
-                }
-            }
             steps {
                 container('docker') {
                 echo "Building and pushing Docker image"
